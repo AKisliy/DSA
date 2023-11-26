@@ -33,8 +33,7 @@ def montecarlo(n):
 n_array = []
 pi_array = []
 delta_array = []
-pi = 3.1415926535
-for i in range(100, 5000, 100):
+for i in range(100, 5001, 100):
     cur = montecarlo(i)
     n_array.append(i)
     pi_array.append(cur)
@@ -45,7 +44,9 @@ plt.subplot(212)
 plt.plot(n_array, delta_array,'r--')
 plt.show()
 
+output = ["%.2f" % i for i in pi_array]
 print(f"n_array = {n_array}")
-print(f"pi_array = {pi_array}")
-print(f"delt_array = {delta_array}")
+print(f"pi_array = {output}")
+output = ["%.6f" % i for i in delta_array]
+print(f"delt_array = {output}")
 
