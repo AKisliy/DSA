@@ -13,10 +13,17 @@ class Point:
         return (self.x * self.x + self.y * self.y) <= 1
 
 
+def get_random_sign():
+    sign = random.randrange(1000) % 2
+    if sign % 2 == 0:
+        return -1
+    return 1
+
+
 def get_random_point():
     random.seed(time.time())
-    x = random.random()
-    y = random.random()
+    x = get_random_sign() * random.random()
+    y = get_random_sign() * random.random()
     return Point(x, y)
 
 
