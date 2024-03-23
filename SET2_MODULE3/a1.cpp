@@ -1,5 +1,5 @@
 //
-// Created by alexe on 22.03.2024.
+// Created by alexe on 12.03.2024.
 //
 #include <iostream>
 #include <vector>
@@ -108,7 +108,7 @@ bool isConnectedAfterRemoval(Graph g,const std::unordered_set<Edge> remainingEdg
     return true; // заглушка
 }
 
-std::pair<int, Edge> findCycle(int node, Graph g, const std::unordered_set<Edge>& edges, std::vector<bool>& visited){
+std::pair<int, Edge> findCycle(int node, int parent, Graph g, const std::unordered_set<Edge>& edges, std::vector<bool>& visited){
     // нашли цикл
     if(visited[node]){
         return {node, Edge(-1, -1, INT32_MIN)};
@@ -116,10 +116,12 @@ std::pair<int, Edge> findCycle(int node, Graph g, const std::unordered_set<Edge>
     visited[node] = true;
     for(auto edge: g.graph[node]){
         if(edges.contains(edge)){ // O(1)
-            auto k = findCycle(edge.to, g, edges, visited);
-            // сосед оказался в цикле
-            if(k.first != -1){
-                return {k.first, k.second.weight > edge.weight ? k.second : edge};
+            if(edge.to != parent) {
+                auto k = findCycle(edge.to, edge.from, g, edges, visited);
+                // сосед оказался в цикле
+                if (k.first != -1) {
+                    return {k.first, k.second.weight > edge.weight ? k.second : edge};
+                }
             }
         }
     }
@@ -213,7 +215,7 @@ std::unordered_set<Edge> alg3(Graph g) {
         if (!uf.Union(e.from, e.to)) {
             // Если ребро создаёт цикл, находим максимальное ребро в этом цикле.
             std::vector<bool> visitedVertices(n);
-            Edge maxEdgeInCycle = findCycle(e.from, g, result, visitedVertices).second;
+            Edge maxEdgeInCycle = findCycle(e.from, -1, g, result, visitedVertices).second;
             // Удаляем максимальное ребро из цикла.(амортизировано O(1))
             result.erase(maxEdgeInCycle);
         }
