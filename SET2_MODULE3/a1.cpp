@@ -18,7 +18,7 @@ public:
         this->to = to;
         this->weight = weight;
     }
-    
+
     bool operator==(const Edge &other) const{
         return from == other.from && to == other.to && weight == other.weight;
     }
@@ -100,17 +100,18 @@ struct std::hash<Edge>{
     }
 };
 
-bool isConnected(Graph g,const std::unordered_set<std::pair<int,int>, pair_hash>& deleted ){
+bool isConnectedAfterRemoval(Graph g,const std::unordered_set<Edge> remainingEdges, int removeFrom, int removeTo){
     // логика проверки связности с помощью BFS
-    // (не забывая в BFS проверять удаленные ребра(работает за O(1))
+    // (не забывая в BFS  проходить только по доступны ребрам(проверка работает за O(1))
+    // и не проходить по {removeFrom, removeTo}
     return true; // заглушка
 }
 
-Edge* findCycle(Graph g, const std::unordered_set<Edge>& edges){
+Edge findCycle(Graph g, const std::unordered_set<Edge>& edges){
     // можно искать цикл с помощью DFS(учитывая только включенные ребра)
     // в alg3 у нас он гарантировано если и будет, то единственный
     // при развороте рекурсии можно найти и самое тяжелое ребро
-    return nullptr;
+    return Edge{};
 }
 
 // ------------------------< Main task>----------------------------------
@@ -119,33 +120,26 @@ Edge* findCycle(Graph g, const std::unordered_set<Edge>& edges){
 
 
 
-std::vector<Edge> alg1(Graph g){
+std::unordered_set<Edge> alg1(Graph g){
     std::vector<Edge> edges(g.edges);
     // сортируем ребра
     std::sort(edges.begin(), edges.end(), compEdges);
-    // какие ребра были удалены
-    std::unordered_set<std::pair<int,int>, pair_hash> deleted;
-    // Т
-    std::vector<Edge> result;
+    // T
+    std::unordered_set<Edge> T(g.edges.begin(), g.edges.end());
     for(Edge e: edges){
-        if(isConnected(g, deleted))
-            deleted.insert({e.from, e.to});
+        if(isConnectedAfterRemoval(g, T, e.from, e.to))
+            T.erase(e);
     }
-    // формируем T
-    for(Edge e: edges){
-        if(!deleted.contains({e.from, e.to}))
-            result.push_back(e);
-    }
-    return result;
+    return T;
 }
 
 std::vector<Edge> alg2(Graph g){
     std::vector<Edge> edges(g.edges);
     size_t m = edges.size();
+    // крайний случай - если нет ребер
     if(m == 0){
         return edges;
     }
-
     // создаем генератор
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -160,7 +154,7 @@ std::vector<Edge> alg2(Graph g){
     // будем использовать UnionFind
     UnionFind u(g.vertices.size());
 
-    for(size_t index = distribution(gen); visited_count != m;){
+    for(size_t index = distribution(gen); visited_count != m; index = distribution(gen)){
         if(visited[index])
             continue;
         visited[index] = true;
@@ -174,15 +168,15 @@ std::vector<Edge> alg2(Graph g){
     return result;
 }
 
-std::unordered_set<Edge> alg3(Graph g){
-    std::vector<Edge> edges(g.edges);
-    size_t m = edges.size();
-    // создаем T
+
+std::unordered_set<Edge> alg3(Graph g) {
+    size_t m = g.edges.size();
     std::unordered_set<Edge> result;
-    
-    if(m == 0){
+    // крайний случай - если нет ребер
+    if(m == 0)
         return result;
-    }
+    
+    UnionFind uf(g.vertices.size());
 
     // создаем генератор
     std::random_device rd;
@@ -193,18 +187,23 @@ std::unordered_set<Edge> alg3(Graph g){
     std::vector<bool> visited(m);
     size_t visited_count = 0;
 
-    for(size_t index = distribution(gen); visited_count != m;){
+    std::vector<Edge> edges(g.edges.begin(), g.edges.end());
+
+    for(size_t index = distribution(gen); visited_count != m; index = distribution(gen)){
         if(visited[index])
             continue;
         visited[index] = true;
         ++visited_count;
-        auto e = edges[index];
+        Edge e = edges[index];
         result.insert(e);
-        Edge* maxEdge = findCycle(g, result);
-        if(maxEdge != nullptr){
-            result.erase(*maxEdge);
+        if (!uf.Union(e.from, e.to)) {
+            // Если ребро создаёт цикл, находим максимальное ребро в этом цикле.
+            Edge maxEdgeInCycle = findCycle(g, result);
+            // Удаляем максимальное ребро из цикла.(амортизированно O(1))
+            result.erase(maxEdgeInCycle);
         }
     }
+
     return result;
 }
 
