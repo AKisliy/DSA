@@ -199,7 +199,7 @@ std::unordered_set<Edge> alg3(Graph g) {
         if (!uf.Union(e.from, e.to)) {
             // Если ребро создаёт цикл, находим максимальное ребро в этом цикле.
             Edge maxEdgeInCycle = findCycle(g, result);
-            // Удаляем максимальное ребро из цикла.(амортизированно O(1))
+            // Удаляем максимальное ребро из цикла.(амортизировано O(1))
             result.erase(maxEdgeInCycle);
         }
     }
