@@ -27,6 +27,7 @@ public:
 // mock class to escape errors
 class Graph{
 public:
+    std::vector<std::vector<Edge>> graph;
     std::vector<Edge> edges;
     std::vector<int> vertices;
 };
@@ -102,16 +103,28 @@ struct std::hash<Edge>{
 
 bool isConnectedAfterRemoval(Graph g,const std::unordered_set<Edge> remainingEdges, int removeFrom, int removeTo){
     // логика проверки связности с помощью BFS
-    // (не забывая в BFS  проходить только по доступны ребрам(проверка работает за O(1))
+    // (не забывая в BFS проходить только по доступны ребрам(проверка работает за O(1))
     // и не проходить по {removeFrom, removeTo}
     return true; // заглушка
 }
 
-Edge findCycle(Graph g, const std::unordered_set<Edge>& edges){
-    // можно искать цикл с помощью DFS(учитывая только включенные ребра)
-    // в alg3 у нас он гарантировано если и будет, то единственный
-    // при развороте рекурсии можно найти и самое тяжелое ребро
-    return Edge{};
+std::pair<int, Edge> findCycle(int node, Graph g, const std::unordered_set<Edge>& edges, std::vector<bool>& visited){
+    // нашли цикл
+    if(visited[node]){
+        return {node, Edge(-1, -1, INT32_MIN)};
+    }
+    visited[node] = true;
+    for(auto edge: g.graph[node]){
+        if(edges.contains(edge)){ // O(1)
+            auto k = findCycle(edge.to, g, edges, visited);
+            // сосед оказался в цикле
+            if(k.first != -1){
+                return {k.first, k.second.weight > edge.weight ? k.second : edge};
+            }
+        }
+    }
+    // вершина не в цикле
+    return {-1, Edge{}};
 }
 
 // ------------------------< Main task>----------------------------------
@@ -171,11 +184,12 @@ std::vector<Edge> alg2(Graph g){
 
 std::unordered_set<Edge> alg3(Graph g) {
     size_t m = g.edges.size();
+    size_t n = g.vertices.size();
     std::unordered_set<Edge> result;
     // крайний случай - если нет ребер
     if(m == 0)
         return result;
-    
+
     UnionFind uf(g.vertices.size());
 
     // создаем генератор
@@ -198,7 +212,8 @@ std::unordered_set<Edge> alg3(Graph g) {
         result.insert(e);
         if (!uf.Union(e.from, e.to)) {
             // Если ребро создаёт цикл, находим максимальное ребро в этом цикле.
-            Edge maxEdgeInCycle = findCycle(g, result);
+            std::vector<bool> visitedVertices(n);
+            Edge maxEdgeInCycle = findCycle(e.from, g, result, visitedVertices).second;
             // Удаляем максимальное ребро из цикла.(амортизировано O(1))
             result.erase(maxEdgeInCycle);
         }
