@@ -181,15 +181,3 @@ int SpecialSorter::charAt(std::string &s, int d) {
     return s[d] - '!';
 }
 
-int SpecialSorter::compareStrings(const std::string &s1, const std::string &s2) {
-    int minLen = std::min(s1.length(), s2.length());
-    for(int i = 0; i < minLen; ++i){
-        ++characterComparisons;
-        if(s1[i] != s2[i]){
-            return s1[i] < s2[i] ? -1 : 1;
-        }
-    }
-    ++characterComparisons;
-    return s1.length() < s2.length() ? -1 : (s1.length() > s2.length() ? 1 : 0);
-}
-
