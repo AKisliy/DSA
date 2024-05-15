@@ -39,7 +39,5 @@ private:
 
     void msd(std::vector<std::string>& arr, int low, int high, int d, bool switchToQuick, std::vector<std::string> &temp);
     int charAt(std::string& s, int d);
-
-    int compareStrings(const std::string& s1, const std::string& s2);
 };
 #endif //ALGOHWS_SPECIALSORTER_H
