@@ -152,12 +152,6 @@ int main() {
     process_test_for_standard_sorter(random_strings, nearly_sorted_strings, reverse_sorted_strings, resultsFile);
     process_test_for_special_sorter(random_strings, nearly_sorted_strings, reverse_sorted_strings, resultsFile);
 
-//    SpecialSorter ss;
-//    std::vector<std::string> test = {"!", "Yieifeijefiei", "DF", "FD", "A", "RD", "B" };
-//    ss.MSDSort(test, true);
-//    for(const auto & str: test)
-//        std::cout<<str<<" ";
-
     resultsFile.close();
     std::cout<<"Results are written to sort_results.csv\n";
     return 0;
